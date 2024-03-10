@@ -12,7 +12,7 @@ export class FindUserByIdUseCase extends UseCase<UserContext.Input, UserContext.
         constructor(){
                 super();
                 this._dao = new UserDao();
-                this.setMethods([this.validate, this.processing, this.mapping]);
+                this.methods = [this.validate, this.processing, this.mapping];
         }
 
         validate = async (input: UserContext.Input) => {

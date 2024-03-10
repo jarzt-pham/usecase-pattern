@@ -8,8 +8,7 @@ export abstract class UseCase<
   protected get methods() {
     return this._methods;
   }
-
-  protected setMethods(methods: Function[]) {
+  protected set methods(methods: Function[]) {
     this._methods = methods;
   }
 
