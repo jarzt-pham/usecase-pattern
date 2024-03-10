@@ -1,34 +1,53 @@
-export abstract class UseCase<
-  UseCaseContextInput,
-  UseCaseContextLoad,
-  UseCaseContextOutput
-> {
-  private _methods: Function[] = [];
+export abstract class UseCase<UsecaseInput, UsecaseOutput> {
+  private _methods: any[] = [];
 
   protected get methods() {
     return this._methods;
   }
-  protected set methods(methods: Function[]) {
-    this._methods = methods;
-  }
 
-  async execute(input: UseCaseContextInput) {
-    if (this._methods.length) {
-      const FIRST_METHOD = 0;
-      let outputMethod = input;
+  protected setMethods(): any;
+  protected setMethods<UsecaseOutput>(
+    ...methods: [fn: (input: UsecaseInput) => Promise<UsecaseOutput>]
+  ): any;
+  protected setMethods<O1>(
+    ...methods: [
+      fnO1: (input: UsecaseInput) => Promise<O1>,
+      fnO2: (input: Awaited<O1>) => Promise<UsecaseOutput>
+    ]
+  ): any;
+  protected setMethods<O1, O2>(
+    ...methods: [
+      fnO1: (input: UsecaseInput) => Promise<O1>,
+      fnO2: (input: Awaited<O1>) => Promise<O2>,
+      fnO3: (input: Awaited<O2>) => Promise<UsecaseOutput>
+    ]
+  ): any;
 
-      for (let i = FIRST_METHOD; i < this._methods.length; i++) {
-        outputMethod = await this._methods[i](outputMethod);
+  protected setMethods(...methods: any[]) {
+    if (methods.length === 0) {
+      for (var property in this) {
+        if (typeof this[property] === "function") {
+          console.log({ property });
+          this._methods.push(this[property]);
+        }
       }
-      return outputMethod;
-    } else throw new Error("Methods are null");
+    } else {
+      this._methods = methods;
+    }
   }
 
-  abstract validate(input: UseCaseContextInput): Promise<UseCaseContextInput>;
-  abstract processing(
-    input: Awaited<ReturnType<typeof this.validate>>
-  ): Promise<UseCaseContextLoad>;
-  abstract mapping(
-    input: Awaited<ReturnType<typeof this.processing>>
-  ): Promise<UseCaseContextOutput>;
+  public async execute(parameterFunction: any) {
+    let resultOfFunction = parameterFunction;
+
+    if (this._methods.length > 0) {
+      const methodsAreExecuted = this._methods;
+      const FIRST_METHOD = 0;
+
+      for (let i = FIRST_METHOD; i < methodsAreExecuted.length; i++) {
+        resultOfFunction = await methodsAreExecuted[i](resultOfFunction);
+      }
+    } else throw new Error("Methods is null");
+
+    return resultOfFunction;
+  }
 }
